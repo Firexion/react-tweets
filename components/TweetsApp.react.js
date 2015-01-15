@@ -3,7 +3,6 @@
 var React = require('react');
 var Tweets = require('./Tweets.react.js');
 var Loader = require('./Loader.react.js');
-var NotificationBar = require('./NotificationBar.react.js');
 
 // Export the TweetsApp component
 module.exports = TweetsApp = React.createClass({
@@ -14,17 +13,22 @@ module.exports = TweetsApp = React.createClass({
     // Get current application state
     var updated = this.state.tweets;
 
-    // Increment the unread count
-    var count = this.state.count + 1;
-
     // Increment the skip count
     var skip = this.state.skip + 1;
 
+    tweet.active = true;
+    
     // Add tweet to the beginning of the tweets array
     updated.unshift(tweet);
 
-    // Set application state
-    this.setState({tweets: updated, count: count, skip: skip});
+    // Set application state (active tweets + reset unread count)
+    var self = this;
+    setTimeout(function(){
+
+        // Set application state (Not paging, add tweets)
+      self.setState({tweets: updated, paging: false, skip: skip});
+
+      }, 1000);
 
   },
 
@@ -69,40 +73,6 @@ module.exports = TweetsApp = React.createClass({
     // Set application state (active tweets + reset unread count)
     this.setState({tweets: updated, count: 0});
 
-  },
-
-  // Method to load tweets fetched from the server
-  loadPagedTweets: function(tweets){
-
-    // So meta lol
-    var self = this;
-
-    // If we still have tweets...
-    if(tweets.length > 0) {
-
-      // Get current application state
-      var updated = this.state.tweets;
-
-      // Push them onto the end of the current tweets array
-      tweets.forEach(function(tweet){
-        updated.push(tweet);
-      });
-
-      // This app is so fast, I actually use a timeout for dramatic effect
-      // Otherwise you'd never see our super sexy loader svg
-      setTimeout(function(){
-
-        // Set application state (Not paging, add tweets)
-        self.setState({tweets: updated, paging: false});
-
-      }, 1000);
-
-    } else {
-
-      // Set application state (Not paging, paging complete)
-      this.setState({done: true, paging: false});
-
-    }
   },
 
   // Method to check if more tweets should be loaded, by scroll position
@@ -175,7 +145,6 @@ module.exports = TweetsApp = React.createClass({
       <div className="tweets-app">
         <Tweets tweets={this.state.tweets} />
         <Loader paging={this.state.paging}/>
-        <NotificationBar count={this.state.count} onShowNewTweets={this.showNewTweets}/>
       </div>
     )
 
